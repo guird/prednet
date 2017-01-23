@@ -13,6 +13,10 @@ __pycache__/
 #emacs saves
 *~
 
+#error and outputs
+job*.e*
+job*.o*
+
 #folders
 kitti_results/
 model_data/

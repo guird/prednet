@@ -5,6 +5,6 @@ cp -r $HOME/PredNet/prednet/ "$TMPDIR"/prednet
 cd "$TMPDIR"/prednet
 module load python
 KERAS_BACKEND=theano python kitti_evaluate.py		
-cp -r "$TMPDIR"/prednet/kitti_results $HOME/Prednet/prednet/kitti_results
+cp -r "$TMPDIR"/prednet/kitti_results $HOME/PredNet/prednet/kitti_results
 
 
