@@ -1,12 +1,15 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.animation as animation
 import numpy as np
 from pylab import *
 
 
+
 #taken from http://stackoverflow.com/questions/4092927/generating-movie-from-python-without-saving-individual-frames-to-files, modified slightly
 dpi = 100
 
-def ani_frame(data, fps):
+def ani_frame(data, fps, fname):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_aspect('equal')
@@ -25,5 +28,5 @@ def ani_frame(data, fps):
     ani = animation.FuncAnimation(fig,update_img,300,interval=30)
     writer = animation.writers['ffmpeg'](fps=fps)
 
-    ani.save('demo.mp4',writer=writer,dpi=dpi)
+    ani.save(fname + '.mp4',writer=writer,dpi=dpi)
     return ani

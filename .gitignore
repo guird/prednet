@@ -21,7 +21,10 @@ job*.o*
 kitti_results/
 model_data/
 kitti_data/
+octave_core/
 
+#videos
+*.mp4
 
 
 # Distribution / packaging
