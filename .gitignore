@@ -6,6 +6,20 @@ __pycache__/
 # C extensions
 *.so
 
+#compiled py files
+*.pyc
+
+
+#emacs saves
+*~
+
+#folders
+kitti_results/
+model_data/
+kitti_data/
+
+
+
 # Distribution / packaging
 .Python
 env/
