@@ -13,23 +13,24 @@ image_shape = (3, 128, 160)
 
 
 f = h.File("../vim2/vim-2/Stimuli.mat", "r")
-d1 = f.get("st")
+#d1 = f.get("st")
 d2 = f.get("sv")
 
-vim2_stim1 = np.array(d1)
-vim2_stim2 = np.array(d2)
+#vim2_stim1 = np.array(d1)
+vim2_stim2 = np.array(d2,np.uint8)
 
 #stimuli are in shape (frames, 3, 128,128), go figure
-vim2_stim1 = np.transpose(vim2_stim1, [0,3,2,1])
+#vim2_stim1 = np.transpose(vim2_stim1, [0,3,2,1])
 vim2_stim2 = np.transpose(vim2_stim2, [0,3,2,1])
 
 
 
-print "stim1 shape"
-print vim2_stim1.shape
+#print "stim1 shape"
+#print vim2_stim1.shape
 print "stim2 shape"
 print vim2_stim2.shape
 
+print vim2_stim2[0,0:3]
 
                   
 
@@ -62,10 +63,19 @@ def process_vid(vid, desired_shape, fps_ratio):
     return finalvid
 
 ani_frame(vim2_stim2, 15, "stim2_raw")
-ani_frame(vim2_stim1, 15, "stim1_raw")
+#ani_frame(vim2_stim1, 15, "stim1_raw")
 vim2_stim2 = process_vid(vim2_stim2, (128,160,3), 1/1.5)
-vim2_stim1 = process_vid(vim2_stim1, (128,160,3), 1/1.5)
+#vim2_stim1 = process_vid(vim2_stim1, (128,160,3), 1/1.5)
+vim2_stim2 = np.uint8(vim2_stim2)
+print vim2_stim2[0,0:3]
+
+
+
+
+hkl.dump(vim2_stim2, "../vim2/preprocessed/vim2_test.hkl")
 
 ani_frame(vim2_stim2, 10, "stim2_preprocessed")
-ani_frame(vim2_stim1, 10, "stim1_preprocessed")
+
+
+#ani_frame(vim2_stim1, 10, "stim1_preprocessed")
 
