@@ -10,6 +10,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import h5py as h
 
 from keras import backend as K
 from keras.models import Model, model_from_json
@@ -17,7 +18,11 @@ from keras.layers import Input, Dense, Flatten
 
 from prednet import PredNet
 from data_utils import SequenceGenerator
-from vim2_utils import vim2_data1, vim2_data2
+from vim2_utils import vim2_stim2 
+
+WEIGHTS_DIR = "model_data"
+DATA_DIR = "../vim2/preprocessed"
+RESULTS_sAVE_DIR = "../vim2/results"
 
 n_plot = 40
 batch_size = 10
@@ -25,8 +30,8 @@ nt = 10
 
 weights_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_weights.hdf5')
 json_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_model.json')
-test_file = os.path.join(DATA_DIR, 'X_test.hkl')
-test_sources = os.path.join(DATA_DIR, 'sources_test.hkl')
+test_file = os.path.join(DATA_DIR, 'vim2_test.hkl')
+#test_sources = os.path.join(DATA_DIR, 'sources_test.hkl')
 
 # Load trained model
 f = open(json_file, 'r')
@@ -46,8 +51,13 @@ inputs = Input(shape=tuple(input_shape))
 predictions = test_prednet(inputs)
 test_model = Model(input=inputs, output=predictions)
 
-test_generator = SequenceGenerator(test_file, test_sources, nt, sequence_start_mode='unique', dim_ordering=dim_ordering)
-X_test = test_generator.create_all()
+#test_generator = SequenceGenerator(test_file, test_sources, nt, sequence_start_mode='unique', dim_ordering=dim_ordering)
+#X_test = test_generator.create_all()
+#[int(vim2_stim2.shape[0] / batch_size)
+X_test = np.zeros([None, batch_size, 128, 160, 3])
+for i in (range(int(X_test.shape[0]))):
+    X_test[i,:,:,:,:] = vim2_stim2[i*batch_size:i*batch_size + batch_size]
+
 X_hat = test_model.predict(X_test, batch_size)
 if dim_ordering == 'th':
     X_test = np.transpose(X_test, (0, 1, 3, 4, 2))
