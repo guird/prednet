@@ -11,6 +11,8 @@ FILE_OUT = "../vim2/vim2_data/"
 
 image_shape = (3, 128, 160)
 
+batch_size = 10
+
 
 f = h.File("../vim2/vim-2/Stimuli.mat", "r")
 #d1 = f.get("st")
@@ -27,10 +29,6 @@ vim2_stim2 = np.transpose(vim2_stim2, [0,3,2,1])
 
 #print "stim1 shape"
 #print vim2_stim1.shape
-print "stim2 shape"
-print vim2_stim2.shape
-
-print vim2_stim2[0,0:3]
 
                   
 
@@ -67,14 +65,13 @@ ani_frame(vim2_stim2, 15, "stim2_raw")
 vim2_stim2 = process_vid(vim2_stim2, (128,160,3), 1/1.5)
 #vim2_stim1 = process_vid(vim2_stim1, (128,160,3), 1/1.5)
 vim2_stim2 = np.uint8(vim2_stim2)
-print vim2_stim2[0,0:3]
 
 
 
+for i in range(int(vim2_stim2.shape[0]/batch_size)):
+    hkl.dump(vim2_stim2[i*batch_size:(i+1)*batch_size], "../vim2/preprocessed/vim2_test+"+str(i)+".hkl")
 
-hkl.dump(vim2_stim2, "../vim2/preprocessed/vim2_test.hkl")
-
-ani_frame(vim2_stim2, 10, "stim2_preprocessed")
+#ani_frame(vim2_stim2, 10, "stim2_preprocessed")
 
 
 #ani_frame(vim2_stim1, 10, "stim1_preprocessed")

@@ -17,8 +17,7 @@ from keras.models import Model, model_from_json
 from keras.layers import Input, Dense, Flatten
 
 from prednet import PredNet
-from data_utils import SequenceGenerator
-from vim2_utils import vim2_stim2 
+from data_utils import SequenceGenerator 
 
 WEIGHTS_DIR = "model_data"
 DATA_DIR = "../vim2/preprocessed"
@@ -42,27 +41,27 @@ train_model.load_weights(weights_file)
 
 # Create testing model (to output predictions)
 layer_config = train_model.layers[1].get_config()
-layer_config['output_mode'] = 'prediction'
+layer_config['output_mode'] = 'error'
 dim_ordering = layer_config['dim_ordering']
 test_prednet = PredNet(weights=train_model.layers[1].get_weights(), **layer_config)
 input_shape = list(train_model.layers[0].batch_input_shape[1:])
 input_shape[0] = nt
 inputs = Input(shape=tuple(input_shape))
-errors = test_prednet(inputs)
-test_model = Model(input=inputs, output=errors)
+predictions = test_prednet(inputs)
+test_model = Model(input=inputs, output=predictions)
 
 #test_generator = SequenceGenerator(test_file, test_sources, nt, sequence_start_mode='unique', dim_ordering=dim_ordering)
 #X_test = test_generator.create_all()
 #[int(vim2_stim2.shape[0] / batch_size)
-X_test = np.zeros(int([vim2_stim2.shape[0]/batch_size), batch_size, 128, 160, 3])
-for i in (range(int(vim2_stim2.shape[0]/batch_size))):
+X_test = np.zeros([vim2_stim2.shape[0]/batch_size*300, batch_size, 128, 160, 3])
+for i in (range(int(vim2_stim2.shape[0]/300*batch_size))):
     X_test[i,:,:,:,:] = vim2_stim2[i*batch_size:i*batch_size + batch_size]
 
 X_hat = test_model.predict(X_test, batch_size)
 if dim_ordering == 'th':
     X_test = np.transpose(X_test, (0, 1, 3, 4, 2))
     X_hat = np.transpose(X_hat, (0, 1, 3, 4, 2))
-
+vim2_stim2=0
 # Compare MSE of PredNet predictions vs. using last frame.  Write results to prediction_scores.txt
 mse_model = np.mean( (X_test[:, 1:] - X_hat[:, 1:])**2 )  # look at all timesteps except the first
 mse_prev = np.mean( (X_test[:, :-1] - X_test[:, 1:])**2 )

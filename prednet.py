@@ -214,7 +214,9 @@ class PredNet(Recurrent):
         c = []
         r = []
         e = []
-
+        
+        
+        
         for l in reversed(range(self.nb_layers)):
             inputs = [r_tm1[l], e_tm1[l]]
             if l < self.nb_layers - 1:

@@ -13,6 +13,9 @@ __pycache__/
 #emacs saves
 *~
 
+#hashtaggy autosave things
+\#*\#
+
 #error and outputs
 job*.e*
 job*.o*
