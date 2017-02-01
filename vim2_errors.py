@@ -11,6 +11,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import h5py as h
+import hickle as hkl
 
 from keras import backend as K
 from keras.models import Model, model_from_json
@@ -29,7 +30,7 @@ nt = 10
 
 weights_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_weights.hdf5')
 json_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_model.json')
-test_file = os.path.join(DATA_DIR, 'vim2_test.hkl')
+test_file = os.path.join(DATA_DIR, 'vim2_test')
 #test_sources = os.path.join(DATA_DIR, 'sources_test.hkl')
 
 # Load trained model
@@ -53,14 +54,15 @@ test_model = Model(input=inputs, output=predictions)
 #test_generator = SequenceGenerator(test_file, test_sources, nt, sequence_start_mode='unique', dim_ordering=dim_ordering)
 #X_test = test_generator.create_all()
 #[int(vim2_stim2.shape[0] / batch_size)
-X_test = np.zeros([vim2_stim2.shape[0]/batch_size*300, batch_size, 128, 160, 3])
-for i in (range(int(vim2_stim2.shape[0]/300*batch_size))):
-    X_test[i,:,:,:,:] = vim2_stim2[i*batch_size:i*batch_size + batch_size]
-
+X_test = np.zeros([539, batch_size, 128, 160,3])
+for i in (range(539)):
+    X_test[i,:,:,:,:] = hkl.load(test_file +"+"+str(i) +".hkl")
+X_test = np.transpose(X_test, (0, 1, 4, 2, 3))
 X_hat = test_model.predict(X_test, batch_size)
-if dim_ordering == 'th':
-    X_test = np.transpose(X_test, (0, 1, 3, 4, 2))
-    X_hat = np.transpose(X_hat, (0, 1, 3, 4, 2))
+
+
+X_hat = np.transpose(X_hat, (0, 1, 4, 2, 3))
+
 vim2_stim2=0
 # Compare MSE of PredNet predictions vs. using last frame.  Write results to prediction_scores.txt
 mse_model = np.mean( (X_test[:, 1:] - X_hat[:, 1:])**2 )  # look at all timesteps except the first
