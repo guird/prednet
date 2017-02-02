@@ -11,10 +11,10 @@ cp -r $HOME/PredNet/prednet/model_data "$TMPDIR"/PredNet/prednet/
 cp -r $HOME/PredNet/vim2/vim-2 "$TMPDIR"/PredNet/vim2/
 cp -r $HOME/PredNet/vim2/preprocessed "$TMPDIR"/PredNet/vim2/
 
-cd "$TMPDIR/PredNet/prednet
+cd "$TMPDIR"/PredNet/prednet
 module load python
 KERAS_BACKEND=theano python vim2_test.py		
 
-cp -r "$TMPDIR"/PredNet/vim2/results $HOME/PredNet/vim2/results
+cp  "$TMPDIR"/PredNet/vim2/results/* $HOME/PredNet/vim2/results
 
 
