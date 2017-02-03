@@ -62,7 +62,7 @@ X_hat = test_model.predict(X_test, batch_size)
 
 
 #X_hat = np.transpose(X_hat, (0, 1, 4, 2, 3))
-
+print X_hat.shape
 
 # Compare MSE of PredNet predictions vs. using last frame.  Write results to prediction_scores.txt
 mse_model = np.mean( (X_test[:, 1:] - X_hat[:, 1:])**2 )  # look at all timesteps except the first

@@ -71,7 +71,7 @@ def process_vid(vid, desired_shape, fps_ratio):
 
 
 for i in range(int(vim2_stim1.shape[0]/batch_size)):
-    vim2_stim1p = process_vid(vim2_stim1[(i*batch_size:(i+1)*batch_size], (128,160,3), 1/1.5)
+    vim2_stim1p = process_vid(vim2_stim1[i*batch_size:(i+1)*batch_size], (128,160,3), 1/1.5)
     hkl.dump(vim2_stim1p, "../vim2/preprocessed/vim2_train"+str(i)+".hkl")
 
 """for i in range(int(vim2_stim2.shape[0]/batch_size)):

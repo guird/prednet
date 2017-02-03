@@ -9,11 +9,11 @@ mkdir "$TMPDIR"/vim2/results
 cp $HOME/PredNet/prednet/* "$TMPDIR"/PredNet/prednet/
 cp -r $HOME/PredNet/prednet/model_data "$TMPDIR"/PredNet/prednet/
 
-cp -r $HOME/PredNet/vim2/preprocessed "$TMPDIR"/PredNet/vim2/preprocessed/
+cp -r $HOME/PredNet/vim2/preprocessed "$TMPDIR"/PredNet/vim2/
 
 cd "$TMPDIR"/PredNet/prednet
 module load python
-KERAS_BACKEND=theano python vim2_errors.py		
+KERAS_BACKEND=theano python vim2_train.py		
 
 cp  "$TMPDIR"/PredNet/vim2/results/. $HOME/PredNet/vim2/results
 
