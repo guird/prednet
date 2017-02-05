@@ -21,7 +21,7 @@ from prednet import PredNet
 #from data_utils import SequenceGenerator 
 
 WEIGHTS_DIR = "model_data"
-DATA_DIR = "../vim2/preprocessed"
+DATA_DIR = "preprocessed"
 RESULTS_SAVE_DIR = "../vim2/results"
 
 n_plot = 40
@@ -61,17 +61,6 @@ X_test = np.transpose(X_test, (0, 1, 4, 2, 3))
 
 X_hat = test_model.predict(X_test, batch_size)
 
-
-X_hat = np.transpose(X_hat, (0, 1, 4, 2, 3))
-X_test = np.transpose(X_test, (0, 1, 4, 2, 3))
-vim2_stim2=0
-# Compare MSE of PredNet predictions vs. using last frame.  Write results to prediction_scores.txt
-mse_model = np.mean( X_test[:, 1:] )  # look at all timesteps except the first
-mse_prev = np.mean( (X_test[:, :-1] - X_test[:, 1:])**2 )
-if not os.path.exists(RESULTS_SAVE_DIR): os.mkdir(RESULTS_SAVE_DIR)
-f = open(RESULTS_SAVE_DIR + 'errorstuff_scores.txt', 'w')
-f.write("Model MSE: %f\n" % mse_model)
-f.write("Previous Frame MSE: %f" % mse_prev)
-f.close()
+hkl.dump(X_hat, "../vim2/results/error_outputs")
 
 # 

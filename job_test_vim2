@@ -3,12 +3,12 @@
 
 mkdir "$TMPDIR"/PredNet
 mkdir "$TMPDIR"/PredNet/prednet
-mkdir "$TMPDIR"/vim2
-mkdir "$TMPDIR"/vim2/results
+mkdir "$TMPDIR"/PredNet/vim2
+mkdir "$TMPDIR"/PredNet/vim2/results
 
 cp  $HOME/PredNet/prednet/* "$TMPDIR"/PredNet/prednet/
 cp -r $HOME/PredNet/prednet/model_data "$TMPDIR"/PredNet/prednet/
-cp -r $HOME/PredNet/vim2/vim-2 "$TMPDIR"/PredNet/vim2/
+
 cp -r $HOME/PredNet/vim2/preprocessed "$TMPDIR"/PredNet/vim2/preprocessed/
 
 cd "$TMPDIR"/PredNet/prednet
