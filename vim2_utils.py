@@ -11,7 +11,8 @@ FILE_OUT = "../vim2/vim2_data/"
 
 image_shape = (3, 128, 160)
 
-batch_size = 10
+end_batch_size = 10 #10 frames per batch in the final output
+batch_size = 15 #that means 15 on the real deal
 
 
 f = h.File("../vim2/vim-2/Stimuli.mat", "r")
@@ -71,7 +72,7 @@ def process_vid(vid, desired_shape, fps_ratio):
 
 
 for i in range(int(vim2_stim1.shape[0]/batch_size)):
-    vim2_stim1p = process_vid(vim2_stim1[i*batch_size*1.5:(i+1)*batch_size*1.5], (128,160,3), 1/1.5)
+    vim2_stim1p = process_vid(vim2_stim1[i*batch_size:(i+1)*batch_size], (128,160,3), 1/1.5)
     print vim2_stim1p.shape
     hkl.dump(vim2_stim1p, "../vim2/preprocessed/vim2_train"+str(i)+".hkl")
 

@@ -15,6 +15,6 @@ cd "$TMPDIR"/PredNet/prednet
 module load python
 KERAS_BACKEND=theano python vim2_test.py		
 
-cp  "$TMPDIR"/PredNet/vim2/results/. $HOME/PredNet/vim2/results
+cp -r  "$TMPDIR"/PredNet/vim2/results/. $HOME/PredNet/vim2/results
 
 
