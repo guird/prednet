@@ -1,5 +1,10 @@
 import numpy as np
 
+import matplotlib
+matplotlib.use('Agg')
+
+from matplotlib import pyplot as plt
+
 from keras import backend as K
 from keras import activations
 from keras.layers import Recurrent
@@ -243,6 +248,12 @@ class PredNet(Recurrent):
             # compute errors
             e_up = self.error_activation(ahat - a)
             e_down = self.error_activation(a - ahat)
+            
+            print e_up
+            
+            fig = plt.figure()
+            plt.imshow(np.array(e_up), np.uint8)
+            fig.savefig("../vim2/results/layer"+str(l)+".png")
 
             e.append(K.concatenate((e_up, e_down), axis=self.channel_axis))
 

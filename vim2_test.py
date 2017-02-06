@@ -66,6 +66,10 @@ X_hat = np.transpose(X_hat, (0, 1, 3, 4, 2))
 print X_hat.shape
 
 ani_frame(X_hat[2], 10, "../vim2/results/xthing.mp4", 10) 
+
+print X_test[1,1]
+print X_hat[1,1]
+
 """
 # Compare MSE of PredNet predictions vs. using last frame.  Write results to prediction_scores.txt
 mse_model = np.mean( (X_test[:, 1:] - X_hat[:, 1:])**2 )  # look at all timesteps except the first

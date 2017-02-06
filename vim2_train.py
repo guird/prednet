@@ -63,14 +63,16 @@ model.compile(loss='mean_absolute_error', optimizer = 'adam')
 X_train = np.zeros([539, batch_size, 128, 160,3])
 
 
-for i in (range(539)):
+for i in (range(num_batches)):
     X_train[i,:,:,:,:] = hkl.load(training_file + str(i) +".hkl")
 X_train = np.transpose(X_train, (0, 1, 4, 2, 3))
 
 errors_shape = errors.shape
 
 for e in range(num_epochs):
-    for i in np.random.shuffle(range(num_batches)):
+    batches = range(num_batches)
+    np.random.shuffle(batches)
+    for i in batches:
         model.train_on_batch(X_train[i,:,:,:,:], np.zeros(errors_shape))
                                    
 

@@ -17,7 +17,7 @@ from keras import backend as K
 from keras.models import Model, model_from_json
 from keras.layers import Input, Dense, Flatten
 
-from prednet import PredNet
+from prederrout import PredNet
 #from data_utils import SequenceGenerator 
 
 WEIGHTS_DIR = "model_data"
@@ -55,11 +55,11 @@ test_model = Model(input=inputs, output=predictions)
 #X_test = test_generator.create_all()
 #[int(vim2_stim2.shape[0] / batch_size)
 X_test = np.zeros([539, batch_size, 128, 160,3])
-for i in (range(539)):
+for i in (range(2)):
     X_test[i,:,:,:,:] = hkl.load(test_file +"+"+str(i) +".hkl")
 X_test = np.transpose(X_test, (0, 1, 4, 2, 3))
 
-X_hat = test_model.predict(X_test, batch_size)
+X_hat = test_model.predict(X_test[1], batch_size)
 
 hkl.dump(X_hat, "../vim2/results/error_outputs")
 
