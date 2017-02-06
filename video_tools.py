@@ -9,7 +9,7 @@ from pylab import *
 #taken from http://stackoverflow.com/questions/4092927/generating-movie-from-python-without-saving-individual-frames-to-files, modified slightly
 dpi = 100
 
-def ani_frame(data, fps, fname):
+def ani_frame(data, fps, fname, frames):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_aspect('equal')
@@ -25,7 +25,7 @@ def ani_frame(data, fps, fname):
         return im
 
     #legend(loc=0)
-    ani = animation.FuncAnimation(fig,update_img,300,interval=30)
+    ani = animation.FuncAnimation(fig,update_img, frames,interval=30)
     writer = animation.writers['ffmpeg'](fps=fps)
 
     ani.save(fname + '.mp4',writer=writer,dpi=dpi)

@@ -65,7 +65,7 @@ X_train = np.zeros([539, batch_size, 128, 160,3])
 
 for i in (range(539)):
     X_train[i,:,:,:,:] = hkl.load(training_file + str(i) +".hkl")
-X_train = np.transpose(X_test, (0, 1, 4, 2, 3))
+X_train = np.transpose(X_train, (0, 1, 4, 2, 3))
 
 errors_shape = errors.shape
 
