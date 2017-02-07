@@ -57,7 +57,9 @@ test_model = Model(input=inputs, output=predictions)
 #[int(vim2_stim2.shape[0] / batch_size)
 X_test = np.zeros([539, batch_size, 128, 160,3])
 for i in (range(1)):
-    X_test[i,:,:,:,:] = hkl.load(test_file +"+"+str(i) +".hkl")
+    bat = hkl.load(test_file +"+"+str(i) +".hkl")
+    print bat
+    X_test[i,:,:,:,:] = bat
 X_test = np.transpose(X_test, (0, 1, 4, 2, 3))
 X_hat = test_model.predict(X_test, batch_size)
 

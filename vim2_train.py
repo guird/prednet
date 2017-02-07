@@ -68,12 +68,13 @@ for i in (range(num_batches)):
 X_train = np.transpose(X_train, (0, 1, 4, 2, 3))
 
 errors_shape = errors.shape
+print errors_shape
 
 for e in range(num_epochs):
     batches = range(num_batches)
     np.random.shuffle(batches)
     for i in batches:
-        model.train_on_batch(X_train[i,:,:,:,:], np.zeros(errors_shape))
+        model.train_on_batch(X_train[i,:,:,:,:], np.zeros((10,) + errors_shape))
                                    
 
 

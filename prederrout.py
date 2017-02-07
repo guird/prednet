@@ -252,7 +252,7 @@ class PredNet(Recurrent):
             print e_up
             
             fig = plt.figure()
-            plt.imshow(np.array(e_up), np.uint8)
+            plt.imshow(np.array(e_up))
             fig.savefig("../vim2/results/layer"+str(l)+".png")
 
             e.append(K.concatenate((e_up, e_down), axis=self.channel_axis))
