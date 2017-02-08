@@ -249,11 +249,7 @@ class PredNet(Recurrent):
             e_up = self.error_activation(ahat - a)
             e_down = self.error_activation(a - ahat)
             
-            print e_up
-            
-            fig = plt.figure()
-            plt.imshow(np.array(e_up))
-            fig.savefig("../vim2/results/layer"+str(l)+".png")
+
 
             e.append(K.concatenate((e_up, e_down), axis=self.channel_axis))
 
@@ -265,7 +261,7 @@ class PredNet(Recurrent):
             output = frame_prediction
         else:
             for l in range(self.nb_layers):
-                layer_error = K.mean(K.batch_flatten(e[l]), axis=-1, keepdims=True)
+                layer_error = e[l]
                 all_error = layer_error if l == 0 else K.concatenate((all_error, layer_error), axis=-1)
             if self.output_mode == 'error':
                 output = all_error

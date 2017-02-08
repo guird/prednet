@@ -17,7 +17,7 @@ from keras import backend as K
 from keras.models import Model, model_from_json
 from keras.layers import Input, Dense, Flatten
 
-from prederrout import PredNet
+from prednet import PredNet
 #from data_utils import SequenceGenerator 
 
 WEIGHTS_DIR = "model_data"
@@ -42,7 +42,7 @@ train_model.load_weights(weights_file)
 
 # Create testing model (to output predictions)
 layer_config = train_model.layers[1].get_config()
-layer_config['output_mode'] = 'error'
+layer_config['output_mode'] = 'predictions'
 dim_ordering = layer_config['dim_ordering']
 test_prednet = PredNet(weights=train_model.layers[1].get_weights(), **layer_config)
 input_shape = list(train_model.layers[0].batch_input_shape[1:])
