@@ -207,7 +207,6 @@ class PredNet(Recurrent):
         c_tm1 = states[self.nb_layers:2*self.nb_layers]
         e_tm1 = states[2*self.nb_layers:3*self.nb_layers]
 
-        np.save(e_tm1, "error.np")
 
         if self.extrap_start_time is not None:
             t = states[-1]
@@ -256,7 +255,6 @@ class PredNet(Recurrent):
             output = frame_prediction
         else:
             for l in range(self.nb_layers):
-                
                 layer_error = K.mean(K.batch_flatten(e[l]), axis=-1, keepdims=True)
                 all_error = layer_error if l == 0 else K.concatenate((all_error, layer_error), axis=-1)
             if self.output_mode == 'error':

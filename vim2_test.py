@@ -6,6 +6,8 @@ Calculates mean-squared error and plots predictions.
 import os
 import numpy as np
 from six.moves import cPickle
+
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -22,8 +24,8 @@ from data_utils import SequenceGenerator
 from video_tools import ani_frame
 
 WEIGHTS_DIR = "model_data"
-DATA_DIR = "../vim2/preprocessed"
-RESULTS_SAVE_DIR = "../vim2/results"
+DATA_DIR = "data"
+RESULTS_SAVE_DIR = "results"
 
 n_plot = 40
 batch_size = 10
@@ -55,27 +57,42 @@ test_model = Model(input=inputs, output=predictions)
 #test_generator = SequenceGenerator(test_file, test_sources, nt, sequence_start_mode='unique', dim_ordering=dim_ordering)
 #X_test = test_generator.create_all()
 #[int(vim2_stim2.shape[0] / batch_size)
-X_test = np.zeros([539, batch_size, 128, 160,3])
-for i in (range(539)):
+numbatches = 300
+X_test = np.zeros([numbatches, batch_size, 128, 160,3])
+for i in (range(numbatches)):
     bat = hkl.load(test_file +"+"+str(i) +".hkl")
-    print bat
-    X_test[i] = bat
+
+    #print bat
+    X_test[i,:,:,:,:] = bat
+
 X_test = np.transpose(X_test, (0, 1, 4, 2, 3))
+
+X_test = X_test/255
 X_hat = test_model.predict(X_test, batch_size)
 
 X_test = np.transpose(X_test, (0, 1, 3, 4, 2))
 X_hat = np.transpose(X_hat, (0, 1, 3, 4, 2))
-print X_hat.shape
 
-ani_frame(X_hat[2], 10, "../vim2/results/xthing.mp4", 10) 
 
-print X_test[1,1]
-print X_hat[1,1]
 
-"""
+#X_hat = np.uint8(X_hat)
 # Compare MSE of PredNet predictions vs. using last frame.  Write results to prediction_scores.txt
-mse_model = np.mean( (X_test[:, 1:] - X_hat[:, 1:])**2 )  # look at all timesteps except the first
-mse_prev = np.mean( (X_test[:, :-1] - X_test[:, 1:])**2 )
+mse_model = np.mean((X_test[:, 1:] - X_hat[:, 1:])**2)  # look at all timesteps except the first
+mse_prev = np.mean((X_test[:, :-1] - X_test[:, 1:])**2)
+
+
+compare_errcurr = np.mean((X_test[:,2:8] - X_hat[:,3:9 ])**2, axis=(1,2,3,4))
+compare_errnext = np.mean((X_test[:,3:9] - X_hat[:,3:9])**2, axis=(1,2,3,4))
+
+xes = range(numbatches)
+
+plt.plot(xes, compare_errcurr, '-g', xes, compare_errnext,  '-r')
+
+plt.savefig("errs.png")
+
+print compare_errcurr
+print compare_errnext
+
 if not os.path.exists(RESULTS_SAVE_DIR): os.mkdir(RESULTS_SAVE_DIR)
 f = open(RESULTS_SAVE_DIR + 'prediction_scores.txt', 'w')
 f.write("Model MSE: %f\n" % mse_model)
@@ -104,4 +121,4 @@ for i in plot_idx:
 
     plt.savefig(plot_save_dir +  'plot_' + str(i) + '.png')
     plt.clf()
-"""
+

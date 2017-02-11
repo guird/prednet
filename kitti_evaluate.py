@@ -54,6 +54,20 @@ if dim_ordering == 'th':
     X_test = np.transpose(X_test, (0, 1, 3, 4, 2))
     X_hat = np.transpose(X_hat, (0, 1, 3, 4, 2))
 
+
+
+compare_errcurr = np.mean((X_test[:,2:8] - X_hat[:,3:9 ])**2, axis=(1,2,3,4))
+compare_errnext = np.mean((X_test[:,3:9] - X_hat[:,3:9])**2, axis=(1,2,3,4))
+
+print np.mean(compare_errcurr)
+print np.mean(compare_errnext)
+
+xes = range(X_test.shape[0])
+
+plt.plot(xes, compare_errcurr, '-g', xes, compare_errnext,  '-r')
+
+plt.savefig("errskitti.png")
+
 # Compare MSE of PredNet predictions vs. using last frame.  Write results to prediction_scores.txt
 mse_model = np.mean( (X_test[:, 1:] - X_hat[:, 1:])**2 )  # look at all timesteps except the first
 mse_prev = np.mean( (X_test[:, :-1] - X_test[:, 1:])**2 )

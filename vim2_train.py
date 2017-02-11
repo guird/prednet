@@ -21,9 +21,10 @@ from prednet import PredNet
 #from data_utils import SequenceGenerator 
 
 WEIGHTS_DIR = "model_data"
-DATA_DIR = "../vim2/preprocessed"
+DATA_DIR = "data"
 RESULTS_SAVE_DIR = "../vim2/results"
 WEIGHTS_OUT_DIR = "vim2_weights"
+
 
 n_plot = 40
 batch_size = 10
@@ -32,10 +33,11 @@ nt = 10
 weights_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_weights.hdf5')
 json_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_model.json')
 training_file = os.path.join(DATA_DIR, 'vim2_train')
+out_file = os.path.join(WEIGHTS_OUT_DIR, "vim2_weights")
 #test_sources = os.path.join(DATA_DIR, 'sources_test.hkl')
 
-num_epochs = 5
-num_batches = 5#let's just say for now
+num_epochs = 1
+num_batches = 2#let's just say for now
 
 
 # Load trained model
@@ -67,16 +69,19 @@ for i in (range(num_batches)):
     X_train[i,:,:,:,:] = hkl.load(training_file + str(i) +".hkl")
 X_train = np.transpose(X_train, (0, 1, 4, 2, 3))
 
-errors_shape = errors.shape
-print errors_shape
+errors_shape = test_prednet.get_output_shape_for(input_shape)
 
 for e in range(num_epochs):
     batches = range(num_batches)
     np.random.shuffle(batches)
     for i in batches:
-        model.train_on_batch(X_train[i,:,:,:,:], np.zeros((10,) + errors_shape))
-                                   
+        zeros = np.zeros((2,10,4))
+        model.train_on_batch(X_train[i:i+2], zeros)
 
+
+json_string = model.to_json()
+with open(out_file, "w") as f:
+    f.write(json_string)
 
 #X_hat = np.transpose(X_hat, (0, 1, 4, 2, 3))
 

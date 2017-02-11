@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import h5py as h
 import hickle as hkl
-
+import theano
 from keras import backend as K
 from keras.models import Model, model_from_json
 from keras.layers import Input, Dense, Flatten
@@ -21,8 +21,8 @@ from prednet import PredNet
 #from data_utils import SequenceGenerator 
 
 WEIGHTS_DIR = "model_data"
-DATA_DIR = "preprocessed"
-RESULTS_SAVE_DIR = "../vim2/results"
+DATA_DIR = "data"
+RESULTS_SAVE_DIR = "results"
 
 n_plot = 40
 batch_size = 10
@@ -42,7 +42,7 @@ train_model.load_weights(weights_file)
 
 # Create testing model (to output predictions)
 layer_config = train_model.layers[1].get_config()
-layer_config['output_mode'] = 'predictions'
+layer_config['output_mode'] = 'error'
 dim_ordering = layer_config['dim_ordering']
 test_prednet = PredNet(weights=train_model.layers[1].get_weights(), **layer_config)
 input_shape = list(train_model.layers[0].batch_input_shape[1:])
@@ -58,9 +58,16 @@ X_test = np.zeros([539, batch_size, 128, 160,3])
 for i in (range(2)):
     X_test[i,:,:,:,:] = hkl.load(test_file +"+"+str(i) +".hkl")
 X_test = np.transpose(X_test, (0, 1, 4, 2, 3))
+X_test /= 255
+#X_hat = test_model.predict(X_test[1], batch_size)
 
-X_hat = test_model.predict(X_test[1], batch_size)
+def get_activations(model, layer, X_batch):
+    get_activations = theano.function([model.layers[0].input], model.layers[layer].get_output(train=False), allow_input_downcast=True)
+    activations = get_activations(X_batch) # same result as above
+    return activations
 
-hkl.dump(X_hat, "../vim2/results/error_outputs")
+errs1= get_activations(test_model, 1, X_test)
+
+hkl.dump(errs1, RESULTS_SAVE_DIR + "/errs1")
 
 # 
