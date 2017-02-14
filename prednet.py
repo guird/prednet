@@ -10,7 +10,6 @@ from keras.engine import InputSpec
 class PredNet(Recurrent):
     '''PredNet architecture - Lotter 2016.
         Stacked convolutional LSTM inspired by predictive coding principles.
-
     # Arguments
         stack_sizes: number of channels in targets (A) and predictions (Ahat) in each layer of the architecture.
             Length is the number of layers in the architecture.
@@ -50,7 +49,6 @@ class PredNet(Recurrent):
             It defaults to the `image_dim_ordering` value found in your
             Keras config file at `~/.keras/keras.json`.
             If you never set it, then it will be "th".
-
     # References
         - [Deep predictive coding networks for video prediction and unsupervised learning](https://arxiv.org/abs/1605.08104)
         - [Long short-term memory](http://deeplearning.cs.cmu.edu/pdfs/Hochreiter97_lstm.pdf)
@@ -80,7 +78,7 @@ class PredNet(Recurrent):
         self.LSTM_activation = activations.get(LSTM_activation)
         self.LSTM_inner_activation = activations.get(LSTM_inner_activation)
 
-        assert output_mode in {'prediction', 'error', 'all'}, 'output_mode must be in {prediction, error, all}'
+        assert output_mode in {'prediction', 'error', 'all', 'all_error'}, 'output_mode must be in {prediction, error, all, all_error}'
         self.output_mode = output_mode
         self.extrap_start_time = extrap_start_time
 
@@ -174,10 +172,11 @@ class PredNet(Recurrent):
             if l < self.nb_layers - 1:
                 self.conv_layers['a'].append(Convolution2D(self.stack_sizes[l+1], self.A_filt_sizes[l], self.A_filt_sizes[l], border_mode='same', activation=self.A_activation, dim_ordering=self.dim_ordering))
 
-        self.upsample = UpSampling2D()
-        self.pool = MaxPooling2D()
+        self.upsample = UpSampling2D(dim_ordering=self.dim_ordering)
+        self.pool = MaxPooling2D(dim_ordering=self.dim_ordering)
 
         self.trainable_weights = []
+        nb_row, nb_col = (input_shape[-2], input_shape[-1]) if self.dim_ordering == 'th' else (input_shape[-3], input_shape[-2])
         for c in sorted(self.conv_layers.keys()):
             for l in range(len(self.conv_layers[c])):
                 ds_factor = 2 ** l
@@ -189,7 +188,8 @@ class PredNet(Recurrent):
                     nb_channels = self.stack_sizes[l] * 2 + self.R_stack_sizes[l]
                     if l < self.nb_layers - 1:
                         nb_channels += self.R_stack_sizes[l+1]
-                in_shape = (input_shape[0], nb_channels, input_shape[-2] // ds_factor, input_shape[-1] // ds_factor)
+                in_shape = (input_shape[0], nb_channels, nb_row // ds_factor, nb_col // ds_factor)
+                if self.dim_ordering == 'tf': in_shape = (in_shape[0], in_shape[2], in_shape[3], in_shape[1])
                 self.conv_layers[c][l].build(in_shape)
                 self.trainable_weights += self.conv_layers[c][l].trainable_weights
 
@@ -207,7 +207,6 @@ class PredNet(Recurrent):
         c_tm1 = states[self.nb_layers:2*self.nb_layers]
         e_tm1 = states[2*self.nb_layers:3*self.nb_layers]
 
-
         if self.extrap_start_time is not None:
             t = states[-1]
             a = K.switch(t >= self.t_extrap, states[-2], a)  # if past self.extrap_start_time, the previous prediction will be treated as the actual
@@ -215,9 +214,7 @@ class PredNet(Recurrent):
         c = []
         r = []
         e = []
-        
-        
-        
+
         for l in reversed(range(self.nb_layers)):
             inputs = [r_tm1[l], e_tm1[l]]
             if l < self.nb_layers - 1:
@@ -243,6 +240,11 @@ class PredNet(Recurrent):
 
             # compute errors
             e_up = self.error_activation(ahat - a)
+            if l == 0:
+                all_error = (e_up,)
+            else:
+                all_error + (e_up,)
+
             e_down = self.error_activation(a - ahat)
 
             e.append(K.concatenate((e_up, e_down), axis=self.channel_axis))
@@ -256,11 +258,14 @@ class PredNet(Recurrent):
         else:
             for l in range(self.nb_layers):
                 layer_error = K.mean(K.batch_flatten(e[l]), axis=-1, keepdims=True)
-                all_error = layer_error if l == 0 else K.concatenate((all_error, layer_error), axis=-1)
+                mean_error = layer_error if l == 0 else K.concatenate((mean_error, layer_error), axis=-1)
             if self.output_mode == 'error':
-                output = all_error
+                output = mean_error
             else:
-                output = K.concatenate((K.batch_flatten(frame_prediction), all_error), axis=-1)
+                if self.output_mode == 'all_error':
+                    output = all_error
+                else:
+                    output = K.concatenate((K.batch_flatten(frame_prediction), mean_error), axis=-1)
 
         states = r + c + e
         if self.extrap_start_time is not None:
@@ -283,3 +288,13 @@ class PredNet(Recurrent):
                   'output_mode': self.output_mode}
         base_config = super(PredNet, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+
+
+
+
+
+
+
+
+

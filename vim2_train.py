@@ -27,7 +27,7 @@ WEIGHTS_OUT_DIR = "vim2_weights"
 
 
 n_plot = 40
-batch_size = 10
+sample_size = 10
 nt = 10
 
 weights_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_weights.hdf5')
@@ -37,46 +37,61 @@ out_file = os.path.join(WEIGHTS_OUT_DIR, "vim2_weights")
 #test_sources = os.path.join(DATA_DIR, 'sources_test.hkl')
 
 num_epochs = 1
-num_batches = 2#let's just say for now
+num_samples = 2#let's just say for now
+batch_size = 2
+num_batches = int(num_samples/batch_size)
+
+#load model
 
 
-# Load trained model
-f = open(json_file, 'r')
-json_string = f.read()
-f.close()
-train_model = model_from_json(json_string, custom_objects = {'PredNet': PredNet})
-train_model.load_weights(weights_file)
+#train from scratch
 
-# Create testing model (to output predictions)
-layer_config = train_model.layers[1].get_config()
-layer_config['output_mode'] = 'error'
-dim_ordering = layer_config['dim_ordering']
-test_prednet = PredNet(weights=train_model.layers[1].get_weights(), **layer_config)
-input_shape = list(train_model.layers[0].batch_input_shape[1:])
-input_shape[0] = nt
-inputs = Input(shape=tuple(input_shape))
-errors = test_prednet(inputs)
+nt = 10
+input_shape = (3, 128, 160)
+stack_sizes = (input_shape[0], 48, 96, 192)
+R_stack_sizes = stack_sizes
+A_filt_sizes = (3, 3, 3)
+Ahat_filt_sizes = (3, 3, 3, 3)
+R_filt_sizes = (3, 3, 3, 3)
+layer_loss_weights = np.array([1., 0., 0., 0.])
+layer_loss_weights = np.expand_dims(layer_loss_weights, 1)
+time_loss_weights = 1./ (nt - 1) * np.ones((nt,1))
+time_loss_weights[0] = 0
+
+
+prednet = PredNet(stack_sizes, R_stack_sizes,
+                  A_filt_sizes, Ahat_filt_sizes, R_filt_sizes,
+                  output_mode='all_ error', return_sequences=True)
+
+inputs = Input(shape=(nt,) + input_shape)
+errors = prednet(inputs)  # errors will be (batch_size, nt, nb_layers)
+
 model = Model(input=inputs, output=errors)
-model.compile(loss='mean_absolute_error', optimizer = 'adam')
+model.compile(loss='mean_absolute_error', optimizer='adam')
 
 #test_generator = SequenceGenerator(test_file, test_sources, nt, sequence_start_mode='unique', dim_ordering=dim_ordering)
 #X_test = test_generator.create_all()
-#[int(vim2_stim2.shape[0] / batch_size)
-X_train = np.zeros([539, batch_size, 128, 160,3])
+#[int(vim2_stim2.shape[0] / batch_size# )
+X_train = np.zeros([num_samples, sample_size, 128, 160,3])
 
 
-for i in (range(num_batches)):
+for i in (range(num_samples)):
     X_train[i,:,:,:,:] = hkl.load(training_file + str(i) +".hkl")
 X_train = np.transpose(X_train, (0, 1, 4, 2, 3))
 
-errors_shape = test_prednet.get_output_shape_for(input_shape)
+
+
+errors_shape = (batch_size,10,4, 128, 160, 3)
+
+target_zero = np.zeros(errors_shape);
 
 for e in range(num_epochs):
-    batches = range(num_batches)
-    np.random.shuffle(batches)
-    for i in batches:
-        zeros = np.zeros((2,10,4))
-        model.train_on_batch(X_train[i:i+2], zeros)
+    samples = range(num_samples)
+    np.random.shuffle(samples)
+
+    for i in range(num_batches):
+
+        model.train_on_batch(X_train[i*batch_size:(i+1)*batch_size], target_zero)
 
 
 json_string = model.to_json()

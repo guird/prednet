@@ -42,7 +42,7 @@ train_model.load_weights(weights_file)
 
 # Create testing model (to output predictions)
 layer_config = train_model.layers[1].get_config()
-layer_config['output_mode'] = 'error'
+layer_config['output_mode'] = 'all'
 dim_ordering = layer_config['dim_ordering']
 test_prednet = PredNet(weights=train_model.layers[1].get_weights(), **layer_config)
 input_shape = list(train_model.layers[0].batch_input_shape[1:])
@@ -61,13 +61,20 @@ X_test = np.transpose(X_test, (0, 1, 4, 2, 3))
 X_test /= 255
 #X_hat = test_model.predict(X_test[1], batch_size)
 
-def get_activations(model, layer, X_batch):
-    get_activations = theano.function([model.layers[0].input], model.layers[layer].get_output(train=False), allow_input_downcast=True)
-    activations = get_activations(X_batch) # same result as above
-    return activations
 
-errs1= get_activations(test_model, 1, X_test)
+errs1 = test_model.predict(X_test[0:2], batch_size)
 
-hkl.dump(errs1, RESULTS_SAVE_DIR + "/errs1")
+hkl.dump(errs1, RESULTS_SAVE_DIR + "errors.hkl")
 
 # 
+
+
+
+
+
+
+
+
+
+
+
