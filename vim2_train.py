@@ -18,6 +18,7 @@ from keras.models import Model, model_from_json
 from keras.layers import Input, Dense, Flatten
 
 from prednet import PredNet
+from theano.tensor.basic import zeros as thzero
 #from data_utils import SequenceGenerator 
 
 WEIGHTS_DIR = "model_data"
@@ -33,12 +34,12 @@ nt = 10
 weights_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_weights.hdf5')
 json_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_model.json')
 training_file = os.path.join(DATA_DIR, 'vim2_train')
-out_file = os.path.join(WEIGHTS_OUT_DIR, "vim2_weights")
+out_file = os.path.join(WEIGHTS_OUT_DIR, "vim2_weights.json")
 #test_sources = os.path.join(DATA_DIR, 'sources_test.hkl')
 
-num_epochs = 1
-num_samples = 2#let's just say for now
-batch_size = 2
+num_epochs = 5
+num_samples = 200#let's just say for now
+batch_size = 10
 num_batches = int(num_samples/batch_size)
 
 #load model
@@ -61,7 +62,7 @@ time_loss_weights[0] = 0
 
 prednet = PredNet(stack_sizes, R_stack_sizes,
                   A_filt_sizes, Ahat_filt_sizes, R_filt_sizes,
-                  output_mode='all_ error', return_sequences=True)
+                  output_mode='error', return_sequences=True)
 
 inputs = Input(shape=(nt,) + input_shape)
 errors = prednet(inputs)  # errors will be (batch_size, nt, nb_layers)
@@ -81,7 +82,7 @@ X_train = np.transpose(X_train, (0, 1, 4, 2, 3))
 
 
 
-errors_shape = (batch_size,10,4, 128, 160, 3)
+errors_shape = (batch_size,10,4)
 
 target_zero = np.zeros(errors_shape);
 
