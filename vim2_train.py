@@ -34,11 +34,11 @@ nt = 10
 weights_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_weights.hdf5')
 json_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_model.json')
 training_file = os.path.join(DATA_DIR, 'vim2_train')
-out_file = os.path.join(WEIGHTS_OUT_DIR, "vim2_weights.json")
+out_file = os.path.join(WEIGHTS_OUT_DIR, "vim2_weights")
 #test_sources = os.path.join(DATA_DIR, 'sources_test.hkl')
 
-num_epochs = 5
-num_samples = 200#let's just say for now
+num_epochs = 1
+num_samples = 20#let's just say for now
 batch_size = 10
 num_batches = int(num_samples/batch_size)
 
@@ -73,12 +73,10 @@ model.compile(loss='mean_absolute_error', optimizer='adam')
 #test_generator = SequenceGenerator(test_file, test_sources, nt, sequence_start_mode='unique', dim_ordering=dim_ordering)
 #X_test = test_generator.create_all()
 #[int(vim2_stim2.shape[0] / batch_size# )
-X_train = np.zeros([num_samples, sample_size, 128, 160,3])
 
 
-for i in (range(num_samples)):
-    X_train[i,:,:,:,:] = hkl.load(training_file + str(i) +".hkl")
-X_train = np.transpose(X_train, (0, 1, 4, 2, 3))
+
+
 
 
 
@@ -86,13 +84,23 @@ errors_shape = (batch_size,10,4)
 
 target_zero = np.zeros(errors_shape);
 
-for e in range(num_epochs):
-    samples = range(num_samples)
-    np.random.shuffle(samples)
+samples = range(num_samples) #a list of the indices all samples of 10 frames
 
-    for i in range(num_batches):
 
-        model.train_on_batch(X_train[i*batch_size:(i+1)*batch_size], target_zero)
+for e in range(num_epochs): #execute some epochs
+     #
+    np.random.shuffle(samples) #randomize sample order
+
+
+    for batch_num in range(num_batches): #for each minibatch
+        batch = samples[batch_size*batch_num:batch_size*(batch_num + 1)] #construct a list of indices of samples for this batch
+        X_train = np.zeros([batch_size, sample_size, 128, 160, 3]) #initialize X_test before we load values
+        ind = 0 #index in X_train
+        for j in batch:
+            X_train[ind, :, :, :, :] = hkl.load(training_file + str(j) + ".hkl") #load the corresponding sample
+            ind += 1
+        X_train = np.transpose(X_train, (0, 1, 4, 2, 3)) #permute dimensions so prednet can accept it
+        model.train_on_batch(X_train, target_zero)
 
 
 json_string = model.to_json()

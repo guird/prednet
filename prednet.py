@@ -102,6 +102,11 @@ class PredNet(Recurrent):
                 return (input_shape[0], input_shape[1], self.nb_layers)
             else:
                 return (input_shape[0], self.nb_layers)
+        elif self.output_mode == 'all_error':
+            el = 0
+            for i in range(self.nb_layers):
+                el += input_shape[2] * input_shape[3] * input_shape[4] / (2**i)
+            return (input_shape[0], input_shape[1], el)
         else:
             if self.return_sequences:
                 return (input_shape[0], input_shape[1], np.prod(input_shape[2:]) + self.nb_layers)
@@ -240,10 +245,6 @@ class PredNet(Recurrent):
 
             # compute errors
             e_up = self.error_activation(ahat - a)
-            if l == 0:
-                all_error = (e_up,)
-            else:
-                all_error + (e_up,)
 
             e_down = self.error_activation(a - ahat)
 
@@ -253,6 +254,8 @@ class PredNet(Recurrent):
                 a = self.conv_layers['a'][l].call(e[l])
                 a = self.pool.call(a)  # target for next layer
 
+
+        all_error = K.batch_flatten(e[0])
         if self.output_mode == 'prediction':
             output = frame_prediction
         else:
@@ -263,6 +266,10 @@ class PredNet(Recurrent):
                 output = mean_error
             else:
                 if self.output_mode == 'all_error':
+
+
+                    all_error = K.batch_flatten(e[l]) if l == 0 else K.concatenate((all_error, K.batch_flatten(e[l])), axis=-1)
+
                     output = all_error
                 else:
                     output = K.concatenate((K.batch_flatten(frame_prediction), mean_error), axis=-1)

@@ -38,7 +38,7 @@ train_model.load_weights(weights_file)
 
 # Create testing model (to output predictions)
 layer_config = train_model.layers[1].get_config()
-layer_config['output_mode'] = 'prediction'
+layer_config['output_mode'] = 'all_error'
 dim_ordering = layer_config['dim_ordering']
 test_prednet = PredNet(weights=train_model.layers[1].get_weights(), **layer_config)
 input_shape = list(train_model.layers[0].batch_input_shape[1:])
@@ -49,6 +49,7 @@ test_model = Model(input=inputs, output=predictions)
 
 test_generator = SequenceGenerator(test_file, test_sources, nt, sequence_start_mode='unique', dim_ordering=dim_ordering)
 X_test = test_generator.create_all()
+print type(X_test)
 X_hat = test_model.predict(X_test, batch_size)
 if dim_ordering == 'th':
     X_test = np.transpose(X_test, (0, 1, 3, 4, 2))

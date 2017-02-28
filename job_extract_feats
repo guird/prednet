@@ -1,5 +1,5 @@
 #PBS -S /bin/bash
-#PBS -lwalltime=10:00:00 -lnodes=1:cores16
+#PBS -lwalltime=30:00:00 -lnodes=1:cores16
 
 mkdir "$TMPDIR"/PredNet
 mkdir "$TMPDIR"/PredNet/prednet
@@ -9,12 +9,12 @@ mkdir "$TMPDIR"/PredNet/vim2/results
 cp $HOME/PredNet/prednet/* "$TMPDIR"/PredNet/prednet/
 cp -r $HOME/PredNet/prednet/model_data "$TMPDIR"/PredNet/prednet/
 
-cp -r $HOME/PredNet/vim2/preprocessed "$TMPDIR"/PredNet/prednet/preprocessed/
+cp -r $HOME/PredNet/vim2/preprocessed "$TMPDIR"/PredNet/vim2/preprocessed/
 
 cd "$TMPDIR"/PredNet/prednet
 module load python
 KERAS_BACKEND=theano python vim2_errors.py		
 
-cp -r  "$TMPDIR"/PredNet/vim2/results/. $HOME/PredNet/vim2/results
+cp  "$TMPDIR"/PredNet/vim2/results/* $HOME/PredNet/vim2/results/
 
 
