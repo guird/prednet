@@ -267,8 +267,8 @@ class PredNet(Recurrent):
             else:
                 if self.output_mode == 'all_error':
 
-
-                    all_error = K.batch_flatten(e[l]) if l == 0 else K.concatenate((all_error, K.batch_flatten(e[l])), axis=-1)
+                    for l in range(self.nb_layers-1):
+                        all_error = K.batch_flatten(e[l]) if l == 0 else K.concatenate((all_error, K.batch_flatten(e[l])), axis=-1)
 
                     output = all_error
                 else:
