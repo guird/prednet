@@ -61,19 +61,22 @@ n_batches = int(np.floor(n_samples/batch_size))
 #X_test = test_generator.create_all()
 #[int(vim2_stim2.shape[0] / batch_size)
 
-for b in (range(n_batches - 100)):
-    if time.time() - starttime > 3600:
+for b in np.arange(n_batches):
+    if time.time() - starttime > 108000:
         break
 
-    b = b+100
+    
     X_test = np.zeros([batch_size, nt,  128, 160,3])
     for i in range(batch_size):
-        X_test[i,:,:,:,:] = hkl.load(test_file +str(int(b*batch_size+i)) +".hkl")
+        print 6+b*batch_size+i
+        X_test[i,:,:,:,:] = hkl.load(test_file +str(int(6+b*batch_size+i)) +".hkl")
     X_test = np.transpose(X_test, (0, 1, 4, 2, 3))
     X_test /= 255
     errs1 = test_model.predict(X_test)
     print errs1.shape
-    hkl.dump(errs1[:,9,:], RESULTS_SAVE_DIR + "errors"+str(b) + ".hkl")
+    hkl.dump(errs1[:,9,:], RESULTS_SAVE_DIR 
++ "errors_frame"+ str(b*batch_size+9+6) + "_" + str((b+1)*batch_size+9+6) 
++".hkl")
 
 #X_hat = test_model.predict(X_test[1], batch_size)
 #test_model._make_predict_function()
