@@ -22,32 +22,32 @@ from theano.tensor.basic import zeros as thzero
 #from data_utils import SequenceGenerator 
 
 WEIGHTS_DIR = "model_data"
-DATA_DIR = "data"
+DATA_DIR = "../vim2/preprocessed/"
 RESULTS_SAVE_DIR = "../vim2/results"
 WEIGHTS_OUT_DIR = "vim2_weights"
 
 
 n_plot = 40
 sample_size = 10
-nt = 10
+
 
 weights_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_weights.hdf5')
 json_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_model.json')
-training_file = os.path.join(DATA_DIR, 'vim2_train')
+training_file = os.path.join(DATA_DIR, 'train')
 out_file = os.path.join(WEIGHTS_OUT_DIR, "vim2_weights")
 #test_sources = os.path.join(DATA_DIR, 'sources_test.hkl')
 
 num_epochs = 1
-num_samples = 20#let's just say for now
-batch_size = 10
+num_samples = 108000#let's just say for now
+batch_size = 5400
 num_batches = int(num_samples/batch_size)
-
+nt = batch_size/4
 #load model
 
 
 #train from scratch
 
-nt = 10
+
 input_shape = (3, 128, 160)
 stack_sizes = (input_shape[0], 48, 96, 192)
 R_stack_sizes = stack_sizes
@@ -62,7 +62,7 @@ time_loss_weights[0] = 0
 
 prednet = PredNet(stack_sizes, R_stack_sizes,
                   A_filt_sizes, Ahat_filt_sizes, R_filt_sizes,
-                  output_mode='error', return_sequences=True)
+                  output_mode='error', return_sequences=True, dim_ordering='th')
 
 inputs = Input(shape=(nt,) + input_shape)
 errors = prednet(inputs)  # errors will be (batch_size, nt, nb_layers)
@@ -80,28 +80,40 @@ model.compile(loss='mean_absolute_error', optimizer='adam')
 
 
 
-errors_shape = (batch_size,10,4)
+errors_shape = (batch_size/nt,nt,4)
 
 target_zero = np.zeros(errors_shape);
 
-samples = range(num_samples) #a list of the indices all samples of 10 frames
+batches = range(num_batches) #a list of the indices all samples of 10 frames
 
 
 for e in range(num_epochs): #execute some epochs
-     #
-    np.random.shuffle(samples) #randomize sample order
+    print "start epoch " + str(e)
+    np.random.shuffle(batches) #randomize sample order
 
 
-    for batch_num in range(num_batches): #for each minibatch
-        batch = samples[batch_size*batch_num:batch_size*(batch_num + 1)] #construct a list of indices of samples for this batch
-        X_train = np.zeros([batch_size, sample_size, 128, 160, 3]) #initialize X_test before we load values
+    for batch_num in batches: #for each minibatch
+        #batch = samples[batch_size*batch_num:batch_size*(batch_num + 1)] #construct a list of indices of samples for this batch
+        print " batch: " + str(batch_num)
+        fname = DATA_DIR + "train"+str(batch_num * batch_size) +"_" + str((batch_num + 1) * batch_size) + ".hkl"
+        print fname
+        X_train =  np.zeros((batch_size/nt,nt, 128, 160,    3))
+        f = hkl.load(fname)
+
+        for i in range(batch_size/nt):
+            X_train[i,:,:,:,:] = f[i*nt:(i+1)*nt]
+
+        #X_train[0,:,:,:,:] = f[0:batch_size/2]
+        #X_train[1,:,:,:,:] = f[batch_size/2:]#initialize X_test before we load values
+
+        print target_zero.shape
         ind = 0 #index in X_train
-        for j in batch:
-            X_train[ind, :, :, :, :] = hkl.load(training_file + str(j) + ".hkl") #load the corresponding sample
-            ind += 1
-        X_train = np.transpose(X_train, (0, 1, 4, 2, 3)) #permute dimensions so prednet can accept it
-        model.train_on_batch(X_train, target_zero)
 
+        X_train = np.transpose(X_train, (0, 1, 4, 2, 3)) #permute dimensions so prednet can accept it
+        print X_train.shape
+        l = model.train_on_batch(X_train, target_zero)
+        print l
+        
 
 json_string = model.to_json()
 with open(out_file, "w") as f:

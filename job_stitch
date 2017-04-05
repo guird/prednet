@@ -1,0 +1,23 @@
+#PBS -S /bin/bash
+#PBS -lwalltime=40:00:00 -lnodes=1:cores16
+
+mkdir "$TMPDIR"/PredNet
+mkdir "$TMPDIR"/PredNet/prednet
+mkdir "$TMPDIR"/PredNet/vim2
+mkdir "$TMPDIR"/PredNet/ridge
+mkdir "$TMPDIR"/PredNet/ridge/ridge
+mkdir "$TMPDIR"/PredNet/vim2/results
+
+
+cp $HOME/PredNet/ridge/ridge/* "$TMPDIR"/PredNet/ridge/ridge
+cp -r $HOME/PredNet/prednet/model_data "$TMPDIR"/PredNet/prednet/
+
+cp $HOME/PredNet/vim2/results/* "$TMPDIR"/PredNet/vim2/results
+
+cd "$TMPDIR"/PredNet/prednet
+module load python
+KERAS_BACKEND=theano python stitch_together.py		
+
+cp  "$TMPDIR"/PredNet/ridge/ridge/corr.png $HOME/PredNet/corr.png
+
+

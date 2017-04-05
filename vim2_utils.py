@@ -12,7 +12,7 @@ FILE_OUT = "../vim2/vim2_data/"
 image_shape = (3, 128, 160)
 
 end_batch_size = 100
-batch_size = 21602
+batch_size = 5400
 max_frames = 108000
 
 #f = h.File("../vim2/vim-2/Stimuli.mat", "r")
@@ -53,17 +53,17 @@ def process_vid(vid, desired_shape):
         newim = imresize(vid[imindex, :,:,:], desired_shape)
         newvid[imindex, :,:,:] = newim
     
-    #scale video frames to reflect fps
+    #scale video ames to reflect fps
 
     return newvid
 
 frame = 0
-while frame < (max_frames - batch_size):
+while frame <= (max_frames - batch_size):
     vim2_train = St.getNode("/st")[frame:frame + batch_size]
     vim2_train = process_vid(vim2_train, (128,160,3))
     hkl.dump(vim2_train, "../vim2/preprocessed/train" +
                          str(frame) + "_" + str(frame+batch_size) + ".hkl")
-    frame += batch_size - 10
+    frame += batch_size 
 
 
 

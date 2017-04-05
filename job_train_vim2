@@ -5,16 +5,17 @@ mkdir "$TMPDIR"/PredNet
 mkdir "$TMPDIR"/PredNet/prednet
 mkdir "$TMPDIR"/PredNet/vim2
 mkdir "$TMPDIR"/PredNet/vim2/results
+mkdir "$TMPDIR"/PredNet/vim2/preprocessed
 
 cp $HOME/PredNet/prednet/* "$TMPDIR"/PredNet/prednet/
 cp -r $HOME/PredNet/prednet/model_data "$TMPDIR"/PredNet/prednet/
 
-cp -r $HOME/PredNet/vim2/preprocessed "$TMPDIR"/PredNet/vim2/
+cp $HOME/PredNet/vim2/preprocessed/train* "$TMPDIR"/PredNet/vim2/preprocessed/
 
 cd "$TMPDIR"/PredNet/prednet
 module load python
 KERAS_BACKEND=theano python vim2_train.py		
 
-cp  "$TMPDIR"/PredNet/vim2/results/. $HOME/PredNet/prednet/vim2_weights/
+cp  "$TMPDIR"/PredNet/prednet/vim2_weights $HOME/PredNet/prednet/vim2_weights/
 
 

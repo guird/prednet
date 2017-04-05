@@ -2,19 +2,20 @@
 #PBS -lwalltime=40:00:00 -lnodes=1:cores16
 
 mkdir "$TMPDIR"/PredNet
-mkdir "$TMPDIR"/PredNet/ridge
-mkdir "$TMPDIR"/PredNet/ridge/ridge
+mkdir "$TMPDIR"/PredNet/prednet
 mkdir "$TMPDIR"/PredNet/vim2
-mkdir "$TMPDIR"/PredNet/vim2/vim-2
+mkdir "$TMPDIR"/PredNet/vim2/preprocessed
+mkdir "$TMPDIR"/PredNet/vim2/results
 
-cp $HOME/PredNet/ridge/ridge/* "$TMPDIR"/PredNet/ridge/ridge/
+cp $HOME/PredNet/prednet/* "$TMPDIR"/PredNet/prednet
+cp -r $HOME/PredNet/prednet/model_data "$TMPDIR"/PredNet/prednet/
 
-cp $HOME/PredNet/vim2/vim-2/*.mat "$TMPDIR"/PredNet/vim2/vim-2/
+cp $HOME/PredNet/vim2/preprocessed/* "$TMPDIR"/PredNet/vim2/preprocessed
 
-cd "$TMPDIR"/PredNet/ridge/ridge
+cd "$TMPDIR"/PredNet/prednet
 module load python
-KERAS_BACKEND=theano python ridgepixels.py		
+KERAS_BACKEND=theano python vim2_errors.py		
 
-cp  "$TMPDIR"/PredNet/ridge/ridge/* $HOME/PredNet/ridge/ridge
+cp  "$TMPDIR"/PredNet/vim2/results/* $HOME/PredNet/vim2/results/
 
 
